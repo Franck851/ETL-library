@@ -1,0 +1,153 @@
+\hypertarget{namespace_e_t_l_1_1curated__tables}{}\doxysection{E\+T\+L.\+curated\+\_\+tables Namespace Reference}
+\label{namespace_e_t_l_1_1curated__tables}\index{ETL.curated\_tables@{ETL.curated\_tables}}
+\doxysubsection*{Functions}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespace_e_t_l_1_1curated__tables_a584c512f3ea3592b1aaa755b962f2ff8}{read}} (config, table, incremental=False, $\ast$$\ast$raw\+\_\+dataframe\+\_\+reader\+\_\+options)
+\item 
+def \mbox{\hyperlink{namespace_e_t_l_1_1curated__tables_a258e97b5dc3791d8579ab27a2dd5ca2d}{write}} (config, table, df=None, transformation=None, incremental=False, raw\+\_\+dataframe\+\_\+reader\+\_\+options=None, $\ast$$\ast$dataframe\+\_\+writer\+\_\+options)
+\item 
+def \mbox{\hyperlink{namespace_e_t_l_1_1curated__tables_a30afc3c3aca3346b37b8eb368f3b2cd7}{merge}} (config, table, df=None, transformation=None, unique\+\_\+key=None, incremental=False, raw\+\_\+dataframe\+\_\+reader\+\_\+options=None)
+\item 
+def \mbox{\hyperlink{namespace_e_t_l_1_1curated__tables_ac3019e182f1823acd72c35ab939c15cc}{delete}} (config, table, drop=False)
+\end{DoxyCompactItemize}
+\doxysubsection*{Variables}
+\begin{DoxyCompactItemize}
+\item 
+def \mbox{\hyperlink{namespace_e_t_l_1_1curated__tables_a3ea993aba95aa4fd78ef84091f132fbe}{upsert}} = \mbox{\hyperlink{namespace_e_t_l_1_1curated__tables_a30afc3c3aca3346b37b8eb368f3b2cd7}{merge}}
+\end{DoxyCompactItemize}
+
+
+\doxysubsection{Detailed Description}
+\begin{DoxyVerb}This module provides utility functions to select, insert and delete operations on delta tables from the curated zone.
+
+The names and structure of tables, folders and paths must conform to the library's standard convention:
+
+  - curated-zone -| - data_source - ...
+            |
+            |
+            | - data_source - ...
+            |
+            |
+            | - yammer -  | - table_name
+                          | - table_name
+                          | - Messages
+                          | - Users
+                          | - Likes\end{DoxyVerb}
+ 
+
+\doxysubsection{Function Documentation}
+\mbox{\Hypertarget{namespace_e_t_l_1_1curated__tables_ac3019e182f1823acd72c35ab939c15cc}\label{namespace_e_t_l_1_1curated__tables_ac3019e182f1823acd72c35ab939c15cc}} 
+\index{ETL.curated\_tables@{ETL.curated\_tables}!delete@{delete}}
+\index{delete@{delete}!ETL.curated\_tables@{ETL.curated\_tables}}
+\doxysubsubsection{\texorpdfstring{delete()}{delete()}}
+{\footnotesize\ttfamily def E\+T\+L.\+curated\+\_\+tables.\+delete (\begin{DoxyParamCaption}\item[{}]{config,  }\item[{}]{table,  }\item[{}]{drop = {\ttfamily False} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Delete delta data.
+
+Only use drop when really needed, otherwise just overwrite or delete.
+
+Parameters
+----------
+config: Config
+  Config instance
+table: str or list, optional
+  Table name
+  Leave empty to use all tables.
+drop: bool, optional
+  Drop table
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespace_e_t_l_1_1curated__tables_a30afc3c3aca3346b37b8eb368f3b2cd7}\label{namespace_e_t_l_1_1curated__tables_a30afc3c3aca3346b37b8eb368f3b2cd7}} 
+\index{ETL.curated\_tables@{ETL.curated\_tables}!merge@{merge}}
+\index{merge@{merge}!ETL.curated\_tables@{ETL.curated\_tables}}
+\doxysubsubsection{\texorpdfstring{merge()}{merge()}}
+{\footnotesize\ttfamily def E\+T\+L.\+curated\+\_\+tables.\+merge (\begin{DoxyParamCaption}\item[{}]{config,  }\item[{}]{table,  }\item[{}]{df = {\ttfamily None},  }\item[{}]{transformation = {\ttfamily None},  }\item[{}]{unique\+\_\+key = {\ttfamily None},  }\item[{}]{incremental = {\ttfamily False},  }\item[{}]{raw\+\_\+dataframe\+\_\+reader\+\_\+options = {\ttfamily None} }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Update data in the delta table.
+
+If df is not provided, read table data from raw.
+
+Performs a 'merge into'/'upsert' of a dataframe/table-view inside the Delta Table.
+Meaning rows are overwritten if it finds one with the same designated unqique fields, or else it is inserted.
+The batch of updates must not contain more than one row with the same chosen unique key.
+
+Handles the creation of the SQL condition update part. Needs an unique key, can be a combination of 2 or more fields.
+Eg. "ON delta_messages.message_id = updates.message_id AND delta_messages.id = updates.id"
+
+Parameters
+----------
+config: Config
+  Config instance
+table: str
+  Name of the table / folder.
+df: pyspark.sql.DataFrame, optional
+  Dataframe containing the data to save in the curated delta table.
+transformation: (pyspark.sql.DataFrame) -> pyspark.sql.DataFrame, optional
+  A function taking a df and returning a df.
+unique_key: list or str, optional
+  Columns with unique values or list of columns to use as a combined unique key.
+incremental: bool, optional
+  To perform incremental load based on the raw-zone's control table content.
+raw_dataframe_reader_options: dict, optional
+  If df is not None, options are used when reading raw zone files.
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespace_e_t_l_1_1curated__tables_a584c512f3ea3592b1aaa755b962f2ff8}\label{namespace_e_t_l_1_1curated__tables_a584c512f3ea3592b1aaa755b962f2ff8}} 
+\index{ETL.curated\_tables@{ETL.curated\_tables}!read@{read}}
+\index{read@{read}!ETL.curated\_tables@{ETL.curated\_tables}}
+\doxysubsubsection{\texorpdfstring{read()}{read()}}
+{\footnotesize\ttfamily def E\+T\+L.\+curated\+\_\+tables.\+read (\begin{DoxyParamCaption}\item[{}]{config,  }\item[{}]{table,  }\item[{}]{incremental = {\ttfamily False},  }\item[{$\ast$$\ast$}]{raw\+\_\+dataframe\+\_\+reader\+\_\+options }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Read all data, equivalent of doing a "SELECT *"
+
+Returns None if no data at path or path does not exists.
+Can still return a empty dataframe or a dataframe of empty rows if such is obtained from reading the files.
+
+Parameters
+----------
+config: Config
+table: str
+incremental: bool
+  To perform incremental read based on the raw-zone's control table content.
+raw_dataframe_reader_options: dict, optional
+  If df is not None, options are used when reading raw
+raw_dataframe_reader_options
+
+Returns
+-------
+pyspark.sql.DataFrame
+\end{DoxyVerb}
+ \mbox{\Hypertarget{namespace_e_t_l_1_1curated__tables_a258e97b5dc3791d8579ab27a2dd5ca2d}\label{namespace_e_t_l_1_1curated__tables_a258e97b5dc3791d8579ab27a2dd5ca2d}} 
+\index{ETL.curated\_tables@{ETL.curated\_tables}!write@{write}}
+\index{write@{write}!ETL.curated\_tables@{ETL.curated\_tables}}
+\doxysubsubsection{\texorpdfstring{write()}{write()}}
+{\footnotesize\ttfamily def E\+T\+L.\+curated\+\_\+tables.\+write (\begin{DoxyParamCaption}\item[{}]{config,  }\item[{}]{table,  }\item[{}]{df = {\ttfamily None},  }\item[{}]{transformation = {\ttfamily None},  }\item[{}]{incremental = {\ttfamily False},  }\item[{}]{raw\+\_\+dataframe\+\_\+reader\+\_\+options = {\ttfamily None},  }\item[{$\ast$$\ast$}]{dataframe\+\_\+writer\+\_\+options }\end{DoxyParamCaption})}
+
+\begin{DoxyVerb}Write/save data in the delta table.
+
+Parameters
+----------
+config: Config
+  Config instance
+table: str
+  Name of the table / folder.
+df: pyspark.sql.DataFrame, optional
+  Dataframe containing the data to save in the curated delta table.
+transformation: (pyspark.sql.DataFrame) -> pyspark.sql.DataFrame, optional
+  A function taking a df and returning a df.
+incremental: bool, optional
+  To perform incremental load based on the raw-zone's control table content.
+raw_dataframe_reader_options: dict, optional
+  If df is not None, options are used when reading raw zone files.
+dataframe_writer_options:
+    mode: str
+        'overwrite' or 'append'
+\end{DoxyVerb}
+ 
+
+\doxysubsection{Variable Documentation}
+\mbox{\Hypertarget{namespace_e_t_l_1_1curated__tables_a3ea993aba95aa4fd78ef84091f132fbe}\label{namespace_e_t_l_1_1curated__tables_a3ea993aba95aa4fd78ef84091f132fbe}} 
+\index{ETL.curated\_tables@{ETL.curated\_tables}!upsert@{upsert}}
+\index{upsert@{upsert}!ETL.curated\_tables@{ETL.curated\_tables}}
+\doxysubsubsection{\texorpdfstring{upsert}{upsert}}
+{\footnotesize\ttfamily def E\+T\+L.\+curated\+\_\+tables.\+upsert = \mbox{\hyperlink{namespace_e_t_l_1_1curated__tables_a30afc3c3aca3346b37b8eb368f3b2cd7}{merge}}}
+

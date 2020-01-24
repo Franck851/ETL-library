@@ -1,0 +1,111 @@
+Documentation\+: \href{https://charlesdarkwind.github.io/ETL-lib.github.io/html/}{\texttt{ https\+://charlesdarkwind.\+github.\+io/\+E\+T\+L-\/lib.\+github.\+io/html/}}
+
+For development or analysis purposes, the library saves time by never mounting volumes unless necessary or if asked to mount anyway, even after clearing a notebook\textquotesingle{}s state.  The volumes accessibility is always assessed at the last possible moment to reduce the chances of using outdated credentials.
+
+Tables data location is abstracted away.
+
+\DoxyHorRuler{0}
+ 
+
+~
+
+\label{index_autotoc_md0}%
+\Hypertarget{index_autotoc_md0}%
+\doxysubparagraph*{Standard / low abstraction modules}
+
+
+\begin{DoxyItemize}
+\item raw
+\item curated
+\item trusted
+\item raw\+\_\+control
+\item curated\+\_\+control
+\end{DoxyItemize}
+
+These modules contain utility functions for read, write and delete operations while enforcing conventional naming, file and folder locations and other standards to keep things organised.
+
+These also log a lot of debug informations in a log file located at\+:
+\begin{DoxyItemize}
+\item windows\+: C\+://logs
+\item data lake\+: raw-\/zone/logs
+\end{DoxyItemize}
+
+\DoxyHorRuler{0}
+ 
+
+~
+
+\label{index_autotoc_md1}%
+\Hypertarget{index_autotoc_md1}%
+\doxysubparagraph*{Utility modules}
+
+
+\begin{DoxyItemize}
+\item utils
+\item config
+\item dbfs\+\_\+utils
+\item json\+\_\+utils
+\item delta\+\_\+utils
+\end{DoxyItemize}
+
+For more flexibility in order to build pipelines that can cover many other use cases. The higher-\/order / standard modules seen before all implement functions from these utility modules.
+
+{\bfseries{utils}} is the only module that can be imported, and its functions used, from anywhere without needing spark or a databricks connection.
+
+\DoxyHorRuler{0}
+ 
+
+~\hypertarget{index_autotoc_md2}{}\doxyparagraph{Installation}\label{index_autotoc_md2}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{pip install ETL-\/lib}
+\end{DoxyCode}
+
+
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{dbutils.library.installPyPI('ETL-\/lib')}
+\end{DoxyCode}
+\hypertarget{index_autotoc_md3}{}\doxyparagraph{Examples}\label{index_autotoc_md3}
+
+\begin{DoxyCode}{0}
+\DoxyCodeLine{from pyspark.sql.functions import to\_timestamp, col}
+\DoxyCodeLine{from pyspark.sql.types import TimestampType}
+\DoxyCodeLine{}
+\DoxyCodeLine{from yammer\_params import params}
+\DoxyCodeLine{from ETL import *}
+\DoxyCodeLine{}
+\DoxyCodeLine{config = Config(params)}
+\DoxyCodeLine{}
+\DoxyCodeLine{}
+\DoxyCodeLine{def parse\_date(df):}
+\DoxyCodeLine{  return df.withColumn(}
+\DoxyCodeLine{    'created\_at', to\_timestamp(col('created\_at').cast(TimestampType()), "yyyy-\/mm-\/dd'T'HH:mm:ss"))}
+\DoxyCodeLine{}
+\DoxyCodeLine{}
+\DoxyCodeLine{\# Read all raw-\/zone data for table "Messages" and overwrite the curated-\/zone delta table:}
+\DoxyCodeLine{curated.write(config, 'Messages', transformation=parse\_date)}
+\DoxyCodeLine{}
+\DoxyCodeLine{\# Read only new raw-\/zone folders and merge it into the curated-\/zone:}
+\DoxyCodeLine{curated.merge(config, 'Messages', transformation=parse\_date, incremental=True)}
+\DoxyCodeLine{}
+\DoxyCodeLine{\# Since raw can only go to curated, ETL.curated\_tables.merge() and ETL.curated.write() do it implicitly}
+\DoxyCodeLine{}
+\DoxyCodeLine{}
+\DoxyCodeLine{\# Example of the same merge but more explicitly using other functions from the library}
+\DoxyCodeLine{def raw\_to\_curated(table, transformation=None, incremental=True):}
+\DoxyCodeLine{}
+\DoxyCodeLine{  \# Read raw data, also retrieve potential control table updates}
+\DoxyCodeLine{  df, short\_paths = raw.read(config, table, incremental=incremental)}
+\DoxyCodeLine{}
+\DoxyCodeLine{  \# Clean it}
+\DoxyCodeLine{  if transformation and not utils.df\_empty(df):}
+\DoxyCodeLine{    df = transformation(df)}
+\DoxyCodeLine{}
+\DoxyCodeLine{  \# Merge into curated table}
+\DoxyCodeLine{  curated.merge(config, table, df, incremental=incremental)}
+\DoxyCodeLine{}
+\DoxyCodeLine{  \# Update control table}
+\DoxyCodeLine{  raw\_control.insert(config, short\_paths)}
+\end{DoxyCode}
+ 
