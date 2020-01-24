@@ -5,10 +5,6 @@ spark-warehouse
 401_fix.py
 test_401.py
 _main.py
-yammer_curated_transforms.py
-yammer_params.py
-test.py
-yammer_trusted_transforms.py
 *__pycache__
 __pycache__/
 .coverage
@@ -44,7 +40,3 @@ deploy.py
 
 ETL_lib.egg-info/*
 ETL_lib.egg-info/
-transit_curated_transforms.py
-transit_params.py
-transit_trusted_transforms.py
-transits_etl.py
